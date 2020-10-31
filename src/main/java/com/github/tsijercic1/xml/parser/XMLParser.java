@@ -15,23 +15,24 @@ public class XMLParser {
     private String document;
 
     public XMLParser(String filepath) throws IOException {
-            BufferedReader reader = new BufferedReader(new FileReader(filepath));
-            StringBuilder builder = new StringBuilder();
-            int t=0;
-            while(true){
-                try {
-                    if ((t = reader.read()) == -1) break;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                builder.append((char)t);
+        BufferedReader reader = new BufferedReader(new FileReader(filepath));
+        StringBuilder builder = new StringBuilder();
+        int t = 0;
+        while (true) {
+            try {
+                if ((t = reader.read()) == -1) break;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            document = builder.toString();
-            reader.close();
+            builder.append((char) t);
+        }
+        document = builder.toString();
+        reader.close();
     }
+
     public Node getDocumentRootNode() throws InvalidXMLException {
-        document=excludeTags(document,"<!--","-->");
-        document=excludeTags(document,"<?","?>");
+        document = excludeTags(document, "<!--", "-->");
+        document = excludeTags(document, "<?", "?>");
         document = document.trim();
         String[] lines = document.split("\n");
         document = "";
@@ -42,7 +43,7 @@ public class XMLParser {
         return createStructure(document);
     }
 
-    private boolean isContentTag(String tag){
+    private boolean isContentTag(String tag) {
         return tag.matches("<_Content>.*");
     }
 
@@ -51,22 +52,22 @@ public class XMLParser {
         ArrayList<String> attributes = new ArrayList<>();
         int numberOfQuotes = 0;
         int startOfAttribute = afterLastCharacterIndex;
-        for(int i=afterLastCharacterIndex;i<s.length();i++){
+        for (int i = afterLastCharacterIndex; i < s.length(); i++) {
             char element = s.charAt(i);
-            if(element == '\"'){
+            if (element == '\"') {
                 numberOfQuotes++;
-                if(numberOfQuotes%2==0){
-                    attributes.add(s.substring(startOfAttribute,i+1).trim());
-                    startOfAttribute=i+1;
+                if (numberOfQuotes % 2 == 0) {
+                    attributes.add(s.substring(startOfAttribute, i + 1).trim());
+                    startOfAttribute = i + 1;
                 }
             }
         }
-        for( String attribute : attributes){
-            String [] pair = attribute.split("=");
-            if(pair.length == 2){
+        for (String attribute : attributes) {
+            String[] pair = attribute.split("=");
+            if (pair.length == 2) {
                 int beginValue = pair[1].indexOf('\"');
                 int endValue = pair[1].lastIndexOf('\"');
-                map.put(pair[0].trim(),pair[1].substring(beginValue+1,endValue));
+                map.put(pair[0].trim(), pair[1].substring(beginValue + 1, endValue));
             }
         }
         return map;
@@ -83,7 +84,7 @@ public class XMLParser {
         Map<String, String> attributes = getAttributesFromTag(root.getTag(), 1 + node.getName().length());
         attributes.forEach(node::addAttribute);
         ArrayList<Node> nodes = getChildNodes(root);
-        for(Node element:nodes){
+        for (Node element : nodes) {
             node.addChildNode(element);
         }
         return node;
@@ -91,13 +92,13 @@ public class XMLParser {
 
     private ArrayList<Node> getChildNodes(Tag root) {
         ArrayList<Node> nodes = new ArrayList<>();
-        for(Tag element : root.getChildren()){
+        for (Tag element : root.getChildren()) {
             Node node;
-            if(isContentTag(element.getTag())){
+            if (isContentTag(element.getTag())) {
                 node = new Node();
-                node.setContent(element.getTag().replace("<_Content>","").replace("</_Content>",""));
+                node.setContent(element.getTag().replace("<_Content>", "").replace("</_Content>", ""));
                 node.setName("");
-            }else{
+            } else {
                 node = new Node(element.getName());
                 Map<String, String> attributes = getAttributesFromTag(element.getTag(), 1 + node.getName().length());
                 attributes.forEach(node::addAttribute);
@@ -112,18 +113,17 @@ public class XMLParser {
 
     private String excludeTags(String document, String leftBorder, String rightBorder) {
         StringBuilder result = new StringBuilder();
-        int start=0;
+        int start = 0;
         int end;
         end = document.indexOf(leftBorder);
-        if(end == -1)return document;
-        for(;;){
-            end = document.indexOf(leftBorder,start);
-            if(end==-1)break;
-            for(int i=start;i<end;i++){
+        if (end == -1) return document;
+        for (; ; ) {
+            end = document.indexOf(leftBorder, start);
+            if (end == -1) break;
+            for (int i = start; i < end; i++) {
                 result.append(document.charAt(i));
-
             }
-            start = document.indexOf(rightBorder,end+leftBorder.length());
+            start = document.indexOf(rightBorder, end + leftBorder.length());
         }
         result = new StringBuilder(result.toString().concat(document.substring(start + rightBorder.length())));
 
@@ -137,15 +137,12 @@ public class XMLParser {
         boolean isInTag = false;
         boolean isContent = false;
         StringBuilder temp = new StringBuilder();
-        for (int i = 0; i < document.length(); i++)
-        {
+        for (int i = 0; i < document.length(); i++) {
             char element = document.charAt(i);
-            if (element == '<')
-            {
-                if (isContent)
-                {
+            if (element == '<') {
+                if (isContent) {
                     temp = new StringBuilder(temp.toString().trim());
-                    dom.add("<_Content>"+temp+"</_Content>");
+                    dom.add("<_Content>" + temp + "</_Content>");
                     temp = new StringBuilder();
                     isContent = false;
                 }
@@ -153,41 +150,27 @@ public class XMLParser {
                     throw new InvalidXMLException("Invalid XML => \"<\" after \"<\"");
                 isInTag = true;
                 temp.append(element);
-            }
-            else if (element == '>' && !isInQuotation)
-            {
+            } else if (element == '>' && !isInQuotation) {
                 if (!isInTag)
-                    throw new InvalidXMLException("Invalid XML => loose \">\" at: "+document.substring(i));
+                    throw new InvalidXMLException("Invalid XML => loose \">\" at: " + document.substring(i));
                 isInTag = false;
                 temp.append(element);
                 temp = new StringBuilder(temp.toString().trim());
                 dom.add(temp.toString());
                 temp = new StringBuilder();
-            }
-            else if (element == '\"')
-            {
+            } else if (element == '\"') {
                 isInQuotation = !isInQuotation;
                 temp.append(element);
-            }
-            else
-            {
-                if (isInTag)
-                {
-                    if (element == '\n')
-                    {
+            } else {
+                if (isInTag) {
+                    if (element == '\n') {
                         temp.append(" ");
-                    }
-                    else
-                    {
+                    } else {
                         temp.append(element);
                     }
-                }
-                else if (isContent)
-                {
+                } else if (isContent) {
                     temp.append(element);
-                }
-                else if (element != ' ' && element != '\n' && element != '\r' && element != '\t')
-                {
+                } else if (element != ' ' && element != '\n' && element != '\r' && element != '\t') {
                     isContent = true;
                     temp.append(element);
                 }

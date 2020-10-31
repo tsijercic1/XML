@@ -10,7 +10,8 @@ class Tag {
         this.tag = tag;
         children = new ArrayList<>();
     }
-    void addChild(Tag tag){
+
+    void addChild(Tag tag) {
         children.add(tag);
     }
 
@@ -33,15 +34,15 @@ class Tag {
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder(tag);
-        for(Tag child : children){
+        for (Tag child : children) {
             result.append("\n\t").append(child.toString("\t\t"));
         }
         return result.toString();
     }
 
-    private String toString(String space){
+    private String toString(String space) {
         StringBuilder result = new StringBuilder(tag);
-        for(Tag child : children){
+        for (Tag child : children) {
             result.append("\n").append(space).append(child.toString("\t" + space));
         }
         return result.toString();
@@ -49,13 +50,13 @@ class Tag {
 
     String getName() {
         StringBuilder name = new StringBuilder();
-        for(int i=1; i<tag.length();i++){
-            if(tag.charAt(i)==' '
-                    || tag.charAt(i)=='\t'
-                    || tag.charAt(i)=='\n'
-                    || tag.charAt(i)=='\r'
-                    || tag.charAt(i)=='>'
-                    || tag.charAt(i)=='/'){
+        for (int i = 1; i < tag.length(); i++) {
+            if (tag.charAt(i) == ' '
+                    || tag.charAt(i) == '\t'
+                    || tag.charAt(i) == '\n'
+                    || tag.charAt(i) == '\r'
+                    || tag.charAt(i) == '>'
+                    || tag.charAt(i) == '/') {
                 break;
             }
             name.append(tag.charAt(i));

@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 public class Writer {
-    public static enum Indentation{
+    public enum Indentation {
         NONE(""),
         SPACE(" "),
         TAB("\t"),
@@ -15,6 +15,7 @@ public class Writer {
         SPACE4("    ");
 
         private String indentation;
+
         Indentation(String indentation) {
             this.indentation = indentation;
         }
@@ -23,6 +24,7 @@ public class Writer {
             return indentation;
         }
     }
+
     private OutputStream outputStream;
 
     public Writer(OutputStream outputStream) {
@@ -32,14 +34,16 @@ public class Writer {
     public boolean writeNode(Node node) throws IOException {
         return writeNode(node, Indentation.NONE);
     }
+
     public boolean writeNode(Node node, Indentation indentation) throws IOException {
         String meta = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
         this.outputStream.write(meta.getBytes());
-        boolean success = writeNodeWithIndentation(node, indentation.getIndentation(),0);
+        boolean success = writeNodeWithIndentation(node, indentation.getIndentation(), 0);
         this.outputStream.flush();
         return success;
     }
-    private boolean writeNodeWithIndentation(Node node,String indentation,int level) throws IOException {
+
+    private boolean writeNodeWithIndentation(Node node, String indentation, int level) throws IOException {
         String prepend = "\n";
         for (int i = 0; i < level; i++) {
             prepend += indentation;
@@ -50,21 +54,21 @@ public class Writer {
             for (Map.Entry<String, String> attribute : attributes.entrySet()) {
                 attributeRow.append(" ").append(attribute.getKey()).append("=\"").append(attribute.getValue()).append("\"");
             }
-            String opening = prepend+"<"+node.getName()+attributeRow;
+            String opening = prepend + "<" + node.getName() + attributeRow;
             if (node.getChildNodesWithContentAsChildNodes().size() > 0) {
                 opening += ">";
                 this.outputStream.write(opening.getBytes());
                 for (Node child : node.getChildNodesWithContentAsChildNodes()) {
-                    writeNodeWithIndentation(child,indentation,level+1);
+                    writeNodeWithIndentation(child, indentation, level + 1);
                 }
-                String closing = prepend+"</" + node.getName() + ">";
+                String closing = prepend + "</" + node.getName() + ">";
                 this.outputStream.write(closing.getBytes());
             } else if (node.getContent() != null && !node.getContent().isEmpty()) {
                 opening += ">";
                 this.outputStream.write(opening.getBytes());
                 String prependContent = prepend + indentation;
                 this.outputStream.write((prependContent + node.getContent()).getBytes());
-                String closing = prepend+"</" + node.getName() + ">";
+                String closing = prepend + "</" + node.getName() + ">";
                 this.outputStream.write(closing.getBytes());
             } else {
                 opening += "/>";

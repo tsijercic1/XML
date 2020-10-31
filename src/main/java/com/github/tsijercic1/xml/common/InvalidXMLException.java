@@ -1,6 +1,6 @@
 package com.github.tsijercic1.xml.common;
 
-public class InvalidXMLException extends Exception{
+public class InvalidXMLException extends Exception {
     public InvalidXMLException() {
         super();
     }
