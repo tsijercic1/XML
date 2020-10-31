@@ -1,10 +1,10 @@
 package com.github.tsijercic1;
 
+import com.github.tsijercic1.xml.common.Node;
+import com.github.tsijercic1.xml.writer.Writer;
+
 import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -61,6 +61,16 @@ public class Main {
         }
         Tip tip = Tip.DOBAR;
         tip.ordinal();
+        Node node = new Node();
+        node.setName("Root");
+        node.addAttribute("class","java.lang.string");
+        node.setContent("This is content");
+        Writer writer = new Writer(new BufferedOutputStream(new FileOutputStream("output.xml")));
+        try {
+            writer.writeNode(node, Writer.Indentation.TAB);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 //  boolean, byte, short, int, long, char, float, and double.

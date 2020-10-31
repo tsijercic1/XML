@@ -31,7 +31,8 @@ public class Node {
     }
 
     public String getContent() {
-        if(getName().isEmpty()) return content;
+        boolean isContent = getName().isEmpty() || (this.content!=null&&!this.content.isEmpty());
+        if(isContent) return content;
         StringBuilder textContent = new StringBuilder();
         for (Node child : childNodes) {
             if(child.getName().equals("")){
